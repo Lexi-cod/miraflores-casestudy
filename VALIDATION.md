@@ -74,3 +74,9 @@ Role assignment, default permissions, per-person allow/block overrides and acces
 - No actual engagement reviews, corrections, sign-offs or client approvals were fabricated for demonstration. The live database remains at initial revision 0. Scripted filing events are not treated as actual filing status.
 
 The test suite verifies application controls, not tax-law correctness or production security certification. See `COMPLIANCE.md` for the complete deployment boundary.
+# Supporting schedule presentation — October 15, 2026
+
+Replaced JSON drawers for depreciation and historical/agency records with readable fields and tables. Added company and sale-date filters, sorting and filtered gain/loss totals without double-counting Form 8949 subtotals. Rentals are grouped by property with a separate combined passive-activity section. Basis history is grouped by entity/year; payments distinguish 2025 credits from 2024 postings; carryovers separate incoming balances from engine carryforwards. Books-to-tax amounts now open extracted evidence directly. Supporting references are expandable.
+
+Validation: JavaScript syntax checks, Python AST parsing and source/schema review only. No automated or browser tests were run. Manual interaction and visual review remain with the user. Saved engagement records and computed values were not changed.
+

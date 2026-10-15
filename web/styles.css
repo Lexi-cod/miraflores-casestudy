@@ -70,3 +70,19 @@
 .review-modes{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}
 @media(max-width:1100px){.form-canvas{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:650px){.form-canvas{grid-template-columns:1fr}.amount-card{padding:18px}}
+/* Supporting schedules: compact records with evidence on demand. */
+.schedule-filters{align-items:flex-end;flex-wrap:wrap;gap:12px}
+.schedule-filters label{display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:600;color:var(--muted,#596d70)}
+.schedule-filters select,.schedule-filters input{max-width:100%;min-height:38px}
+.schedule-filters select[data-sales-filter="company"]{width:280px}
+.schedule-summary{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;padding:16px 22px;background:var(--wash,#f4f8f5);border-bottom:1px solid var(--line,#dbe4df);font-size:13px}
+.schedule-inset{margin:16px 22px}
+.schedule-record-list{display:grid;gap:12px}
+.schedule-record-list>div{padding:12px;border:1px solid var(--line,#dbe4df);border-radius:8px}
+.basis-year{padding:14px 0;border-bottom:1px solid var(--line,#dbe4df)}
+.basis-year:last-child{border-bottom:0}
+.basis-year h4{margin:0 0 10px;font-size:15px}
+.schedule-notes{padding-left:22px;line-height:1.7}
+.schedule-notes li{margin-bottom:10px}
+.schedule-filters button:focus-visible,.amount-link:focus-visible{outline:2px solid var(--green,#214d3c);outline-offset:3px}
+@media(max-width:700px){.schedule-filters label{width:100%}.schedule-filters select[data-sales-filter="company"]{width:100%}.schedule-summary{align-items:flex-start;flex-direction:column}}
