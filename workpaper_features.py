@@ -12,6 +12,7 @@ import math
 import operator
 import secrets
 import zipfile
+import workpaper_calculations
 from datetime import datetime, timezone
 
 A = None
@@ -34,7 +35,7 @@ def bind(app):
 
 def ensure(s):
     s.setdefault('engagement', dict(A.PACKET['firm']['assignment_at_start'], due='2026-10-15', actor='packet', reason='Starting team supplied in firm.assignment_at_start'))
-    for key, default in [('supplemental_lines',[]),('adjustment_reviews',{}),('calculations',{}),('outside_filings',{}),('related_reviews',{}),('filing_events',[]),('notice_responses',{}),('next_years',{}),('retention',{'years':7,'legal_hold':False}),('answer_evidence',[])]:
+    for key, default in [('review_confirmations',{}),('supplemental_lines',[]),('adjustment_reviews',{}),('calculations',{}),('outside_filings',{}),('related_reviews',{}),('filing_events',[]),('notice_responses',{}),('next_years',{}),('retention',{'years':7,'legal_hold':False}),('answer_evidence',[])]:
         s.setdefault(key, copy.deepcopy(default))
     return s
 
@@ -135,13 +136,18 @@ def calculate(s,expression,refs):
     A.require(isinstance(result,(int,float)) and math.isfinite(result) and abs(result)<1e15,'Calculation is outside the allowed range.')
     return dict(result=result,values=values,input_hash=A.digest(values))
 
+def confirmation_status(s):
+    line_map=A.lines(s)
+    return {uid:{k:{**c,'current':k in line_map and c.get('version')==s['version'] and c.get('value')==A.effective(s,k) and c.get('preparation_hash')==A.digest(s['verifications'].get(k))} for k,c in records.items()} for uid,records in s.get('review_confirmations',{}).items()}
+
 def projection(s):
     calculations={}
     for k,c in s.get('calculations',{}).items():
         try:
             current=calculate(s,c['expression'],c['refs']);calculations[k]={**c,'current':current,'stale':current['input_hash']!=c['input_hash']}
         except (ValueError,KeyError,StopIteration):calculations[k]={**c,'stale':True}
-    return dict(finding_summary=finding_estimates(s),estimate=estimate(s),adjustment_status={k:adjustment_status(s,k) for k in s['adjustments']},
+    confirmations=confirmation_status(s)
+    return dict(derivations=workpaper_calculations.explain_all(A,s),review_confirmations=confirmations,finding_summary=finding_estimates(s),estimate=estimate(s),adjustment_status={k:adjustment_status(s,k) for k in s['adjustments']},
         calculations=calculations,package_hash=package_hash(s),outside_catalog=[dict(id=i,label=l,refs=r,hint=h) for i,l,r,h in OUTSIDE],
         next_years=s.get('next_years',{}),retention=s.get('retention',{}))
 
@@ -293,12 +299,42 @@ def artifact(s,u,scope='review',notice=None):
         state['adjustments']={k:{field:a.get(field) for field in ['key','original','value','delta','federal_estimate','california_estimate']} for k,a in state['adjustments'].items()}
     esc=lambda x:html.escape(str(x if x is not None else ''))
     def ident(ref):return 'r-'+base64.urlsafe_b64encode(ref.encode()).decode().rstrip('=')
-    def link(ref):return '<a href="#'+ident(ref)+'">'+esc(ref)+'</a>'
+    def link(ref):
+        try:
+            item=A.resolve(ref,s)
+            if not full:item=A.redact(item)
+            caption=item.get('label') or item.get('description') or item.get('title') or ref if isinstance(item,dict) else ref
+            number=item.get('value') if isinstance(item,dict) else item
+            if type(number) in [int,float]:caption=str(caption)+' · '+f'{number:,.2f}'
+        except (ValueError,KeyError,StopIteration,IndexError):caption=ref
+        return '<a href="#'+ident(ref)+'">'+esc(caption)+'</a>'
     def table(headers,rows):return '<table><thead><tr>'+''.join('<th>'+esc(h)+'</th>' for h in headers)+'</tr></thead><tbody>'+''.join('<tr>'+''.join('<td>'+v+'</td>' for v in r)+'</tr>' for r in rows)+'</tbody></table>'
+    def label(key):
+        return str(key).replace('_',' ').replace('sha256','SHA-256').capitalize()
+    def readable(value,key=''):
+        if value is None:return '<span class="muted">Not supplied</span>'
+        if isinstance(value,bool):return 'Yes' if value else 'No'
+        if isinstance(value,(int,float)):
+            unitless=key in ['year','revision','amendment','id','batch_event','life_years','years','page','page_count','hours','value_type'] or 'ratio' in key or 'rate' in key or 'percent' in key
+            return esc(f'{value:,}' if unitless else f'${value:,.2f}')
+        if isinstance(value,str):
+            if key in ['refs','sources','source','evidence_ref'] and (value in A.lines(s) or value.startswith(('ev-','doc:','asset:','py:/','agency:/','answer:','evidence:','ref:param.','qa-','msg-','call-','D'))):return link(value)
+            if key in ['actor','reviewer','partner','owner','assignee','reviewed_by','answered_by','resolved_by']:
+                return esc(A.STAFF.get(value,{}).get('name',value))
+            return esc(value)
+        if isinstance(value,list):return '<ol>'+''.join('<li>'+readable(item,key)+'</li>' for item in value)+'</ol>' if value else '<span class="muted">None recorded</span>'
+        if isinstance(value,dict):
+            if not value:return '<span class="muted">None recorded</span>'
+            if value.get('unit') in ['ratio','number'] and type(value.get('value')) in [int,float]:
+                return esc(value.get('label','Value'))+': '+esc(f"{value['value']:,.6f}".rstrip('0').rstrip('.'))
+            return '<dl>'+''.join('<div><dt>'+esc(label(k))+'</dt><dd>'+readable(v,k)+'</dd></div>' for k,v in value.items() if k not in ['content','encoding','_before','previous_hash'])+'</dl>'
+        return esc(value)
     title='Client return copy' if client else 'Notice response record' if notice else 'Examiner and review record'
     body='<h1>'+title+'</h1><p>Okafor–Lindqvist · TY 2025 · '+esc(s['version'])+'</p><p>Package fingerprint: '+esc(package_hash(s))+'</p><p>Engine totals are preserved. Adjustment effects are packet-rate estimates, not recomputed tax totals.</p>'
-    body+='<h2>Return summary</h2>'+table(['Jurisdiction','Engine totals'],[[esc(j),'<pre>'+esc(json.dumps(v,indent=2))+'</pre>'] for j,v in A.version(s)['summary'].items()])
-    body+='<h2>Adjustment estimates</h2><pre>'+esc(json.dumps(estimate(s),indent=2))+'</pre>'
+    body+='<h2>Return summary</h2>'+table(['Jurisdiction','Engine totals'],[[esc(j.title()),readable(v)] for j,v in A.version(s)['summary'].items()])
+    estimate_record=estimate(s)
+    if client:estimate_record={k:v for k,v in estimate_record.items() if isinstance(v,(int,float))}
+    body+='<h2>Estimated adjustment effects</h2>'+readable(estimate_record)
     if notice:
         n=next(n for n in packet['tax_agency_records']['notices'] if n['id']==notice);r=state.get('notice_responses',{}).get(notice,{})
         body+='<h2>'+esc(n['type'])+'</h2><p>'+esc(r.get('text','No response drafted.'))+'</p><p>'+esc(r.get('status','Not started'))+'</p>'+''.join(link(x)+' ' for x in r.get('refs',[]))
@@ -306,22 +342,31 @@ def artifact(s,u,scope='review',notice=None):
     working={l['key']:A.effective(s,l['key']) for l in A.version(s)['lines']}
     if not full:working=A.redact(working)
     body+='<h2>Return amounts</h2>'+table(['Line','Description','Engine','Working','Support'],[[f'<span id="{ident(l["key"])}">'+esc(l['key'])+'</span>',esc(l['label']),esc(l['value']) if l.get('engine_present',True) else 'Not in engine',esc(working[l['key']]),'' if client else ' '.join(link(r) for r in l['sources']+l['inputs'])] for l in report_lines])
-    body+='<h2>Authorizations</h2><pre>'+esc(json.dumps(state.get('approvals',{}),indent=2))+'</pre>'
+    body+='<h2>Authorizations</h2>'+readable(state.get('approvals',{}))
     if not client:
-        body+='<h2>Review record</h2>'+table(['Record','Recorded work'],[[esc(k),'<pre>'+esc(json.dumps(state.get(k),indent=2))+'</pre>'] for k in ['verifications','adjustments','adjustment_reviews','calculations','resolutions','notes','judgments','outside_filings','related_reviews','signatures','filing_events','notice_responses']])
+        state['review_confirmations']=confirmation_status(s)
+        if not full:state['review_confirmations']=A.redact(state['review_confirmations'])
+        body+='<h2>Review record</h2>'+''.join('<details open><summary>'+esc(label(k))+'</summary>'+readable(state.get(k))+'</details>' for k in ['verifications','review_confirmations','adjustments','adjustment_reviews','calculations','resolutions','notes','judgments','outside_filings','related_reviews','signatures','filing_events','notice_responses'])
+        derivations=workpaper_calculations.explain_all(A,s)
+        if not full:derivations=A.redact(derivations)
+        body+='<h2>Arithmetic checks</h2><p>Read-only checks using supplied rules. Differences do not change engine or working return amounts.</p>'
+        body+=''.join('<details><summary>'+esc(key+' · '+A.lines(s)[key]['label'])+'</summary>'+table(['Step','Engine-input check'],[[esc(step['label']),esc(f"{step['value']:,.6f}" if step['unit']=='ratio' else f"{step['value']:,.2f}")] for step in d['engine']['steps']])+'<p>Rounded result: '+esc(d['engine']['rounded'])+' · Difference from engine: '+esc(d['engine']['difference'])+'</p>'+('<h3>Working-input check</h3>'+readable(d['working']) if d['working'] and (d['working']['steps']!=d['engine']['steps'] or d['working']['difference']!=d['engine']['difference']) else '')+'</details>' for key,d in derivations.items())
         for d in packet['documents']:
             body+=f'<h2 id="{ident(d["id"])}">'+esc(d['id']+' · '+d['title'])+'</h2>'
             for pg in d['pages']:
                 body+=f'<h3 id="{ident("doc:"+d["id"]+"#page"+str(pg["page"]))}">Page '+esc(pg['page'])+'</h3><pre>'+esc(pg['printed_content'])+'</pre>'
                 for e in packet['extracted_values']:
                     if e['document_id']==d['id'] and e['page']==pg['page']:body+=f'<p id="{ident(e["id"])}">'+esc(e['id']+' · '+e['label']+': '+str(e['value']))+'</p>'
-        for e in state.get('answer_evidence',[]):body+=f'<section id="{ident(e["id"])}"><h3>Client / colleague response</h3><pre>'+esc(json.dumps(e,indent=2))+'</pre></section>'
+        for e in state.get('answer_evidence',[]):body+=f'<section id="{ident(e["id"])}"><h3>Client / colleague response</h3>'+readable(e)+'</section>'
         for n in state.get('notes',[]):body+=f'<section id="{ident("note:"+n["id"])}"><h3>Review note</h3><p>'+esc(n['text'])+'</p></section>'
         # Include every additional referenced object so the report works offline.
         refs={r for l in A.version(s)['lines'] for r in l['sources']}
         refs.update(r for e in s['events'] for r in e.get('payload',{}).get('refs',[]))
         refs.update(e['id'] for e in s['evidence'])
         refs.update('related:'+str(i) for i in range(len(packet['household']['related_returns'])))
+        refs.update(r for a in A.version(s)['assets'] for r in a.get('sources',[]))
+        refs.update('asset:'+a['asset_id'] for a in A.version(s)['assets'])
+        refs.update(r for d in derivations.values() for r in d['engine']['refs'])
         for ref in sorted(refs):
             if ref in A.lines(s) or ref.startswith(('ev-','doc:')) or any(d['id']==ref for d in packet['documents']):continue
             try:x=A.resolve(ref,s);x=x if full else A.redact(x)
@@ -332,9 +377,9 @@ def artifact(s,u,scope='review',notice=None):
                     body+=f'<section id="{ident(ref)}"><h3>'+esc(x['name'])+'</h3><a href="attachments/'+esc(safe)+'">Open attachment</a><p>SHA-256 '+esc(x['sha256'])+'</p></section>'
                 else:body+=f'<section id="{ident(ref)}"><h3>'+esc(x['name'])+'</h3><p>Binary content requires a cleared full archive.</p></section>'
                 continue
-            body+=f'<section id="{ident(ref)}"><h3>'+esc(ref)+'</h3><pre>'+esc(json.dumps(x,indent=2))+'</pre></section>'
-        body+='<h2>Attributed history</h2>'+table(['When','Who','Action','Details'],[[esc(e['at']),esc(e['name']),esc(e['action']),'<pre>'+esc(json.dumps(e['payload'],indent=2))+'</pre>'] for e in state['events']])
-    markup='<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>'+title+'</title><style>body{font:14px system-ui;max-width:1150px;margin:40px auto;padding:0 20px;color:#18352b}h1,h2,h3{break-after:avoid}table{border-collapse:collapse;width:100%;margin:20px 0}td,th{border:1px solid #cbd6d0;padding:8px;text-align:left;vertical-align:top}pre{white-space:pre-wrap;overflow-wrap:anywhere;font:12px system-ui}a{color:#236f50}section{margin:24px 0}@media print{body{margin:0}thead{display:table-header-group}tr{break-inside:avoid}}</style>'+body+'</html>'
+            body+=f'<section id="{ident(ref)}"><h3>'+esc(ref)+'</h3>'+readable(x)+'</section>'
+        body+='<h2>Attributed history</h2>'+table(['When','Who','Action','Details'],[[esc(e['at']),esc(e['name']),esc(label(e['action'])),readable(e['payload'])] for e in state['events']])
+    markup='<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>'+title+'</title><style>body{font:14px system-ui;max-width:1150px;margin:40px auto;padding:0 20px;color:#18352b}h1,h2,h3{break-after:avoid}table{border-collapse:collapse;width:100%;margin:20px 0}td,th{border:1px solid #cbd6d0;padding:8px;text-align:left;vertical-align:top}pre{white-space:pre-wrap;overflow-wrap:anywhere;font:12px system-ui}a{color:#236f50}section{margin:24px 0}dl{margin:0}dl>div{display:grid;grid-template-columns:minmax(130px,1fr) minmax(0,3fr);gap:16px;padding:7px 0;border-bottom:1px solid #e5ece8}dt{font-weight:600}dd{margin:0;overflow-wrap:anywhere}details{border:1px solid #dce5df;border-radius:6px;padding:14px;margin:12px 0}summary{font-weight:600;cursor:pointer}.muted{color:#65766e}li{margin:8px 0}@media print{body{margin:0}thead{display:table-header-group}tr{break-inside:avoid}}</style>'+body+'</html>'
     output=io.BytesIO()
     with zipfile.ZipFile(output,'w',zipfile.ZIP_DEFLATED) as z:
         z.writestr('index.html',markup)

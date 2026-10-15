@@ -25,6 +25,9 @@ function evidenceGraph(){
   const edges=new Map(),add=(a,b)=>{if(!edges.has(a))edges.set(a,new Set());edges.get(a).add(b)};
   for(const d of D.packet.documents)for(const p of d.pages)add(d.id,`doc:${d.id}#page${p.page}`);
   for(const e of D.packet.extracted_values)add(`doc:${e.document_id}#page${e.page}`,e.id);
+  for(const a of rv().assets||[])for(const r of a.sources||[])add(r,'asset:'+a.asset_id);
+  // Prior-year line mappings are explicit packet evidence, not inferred matches.
+  for(const [key,source] of Object.entries(D.packet.prior_years.return_2024.line_sources||{}))add(source,'py:/return_2024/lines/'+key);
   for(const l of rv().lines)add(l.form,l.key);
   for(const l of rv().lines)for(const r of [...l.sources,...l.inputs,...(D.state.adjustments[l.key]?.refs||[]),...(D.state.calculations?.[l.key]?.refs||[])])add(r,l.key);
   for(const link of D.state.links)add(link.source,link.target);

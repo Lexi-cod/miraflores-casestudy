@@ -86,3 +86,6 @@
 .schedule-notes li{margin-bottom:10px}
 .schedule-filters button:focus-visible,.amount-link:focus-visible{outline:2px solid var(--green,#214d3c);outline-offset:3px}
 @media(max-width:700px){.schedule-filters label{width:100%}.schedule-filters select[data-sales-filter="company"]{width:100%}.schedule-summary{align-items:flex-start;flex-direction:column}}
+.calculation-steps{padding-left:24px;margin:16px 0}
+.calculation-steps li{padding:10px 6px;border-bottom:1px solid var(--border);line-height:1.6}
+.calculation-steps li strong{display:block;font-variant-numeric:tabular-nums;color:var(--green)}

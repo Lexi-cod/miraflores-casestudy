@@ -1,3 +1,13 @@
+# Targeted review corrections ? October 15, 2026
+
+Separated reviewer/partner confirmations from preparer tie-outs, preserving independent sign-off and batch undo. Confirmations become stale when the underlying preparer tie-out changes; recording one reopens review signatures/client authorization without resetting preparer handoff. Existing tie-outs/history are preserved.
+
+Added asset/source and explicit prior-year source edges, corrected California payment lines, and replaced the fixed books-to-tax bridge with selected-version and working-input arithmetic. Added read-only stepwise calculation checks for totals, basis, deduction/credit limits and state allocations. Complex worksheets without supplied intermediate steps retain explicit component/rate explanations and the recorded-calculation action; no missing tax rules are invented. Engine amounts are never silently replaced.
+
+Portable exports now present readable summaries, review records, arithmetic checks and attributed history, with offline source links and a separate machine-readable record. No saved engagement work was reset.
+
+Validation is limited to source/schema review, Python AST parsing, JavaScript syntax checks and Git whitespace checks. No automated or browser tests were run. Manual workflow and export review remain outstanding.
+
 # Requirements completion update ? October 15, 2026
 
 Implemented clickable form amounts, missing working detail, recorded calculations, transitive source use, answer/note evidence, independent adjustment approvals, outside-filing/related-return conclusions, package-bound authorizations, simulated filing lifecycle, notice responses, portable binders, next-year intake, per-tab sessions, encrypted-state support and retention controls. Free Render Postgres deployment support replaces the proposed paid disk configuration.

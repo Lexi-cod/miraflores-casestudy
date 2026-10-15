@@ -19,7 +19,7 @@ App: **https://miraflores-casestudy.onrender.com/**. Hosting: **Render Free web 
 7. **Client portal:** own questions, return copy and typed authorization bound to the reviewed package fingerprint. Changes reopen approval.
 8. **Firm administration:** team, role defaults, individual permission overrides, standards, time/budget and retention holds. Administrators receive operational records without the tax packet.
 
-Priya Raman prepares, Daniel Ortiz reviews and Helen Strand signs as partner. Forms inherit those assignments unless delegated. The assignment bell shows work and handoffs for the selected person. Marcus Bell remains masked unless an administrator changes his clearance. Role defaults and workflow gates are enforced on the server.
+Priya Raman prepares, Daniel Ortiz reviews and Helen Strand signs as partner. Forms inherit those assignments unless delegated. The assignment bell shows work and handoffs for the selected person. Marcus Bell remains masked unless an administrator changes his clearance. Role defaults and workflow gates are enforced on the server. Preparers record tie-outs; reviewers and partners use Confirm review to record separate, independent confirmations without replacing preparer work.
 
 ## Local run
 

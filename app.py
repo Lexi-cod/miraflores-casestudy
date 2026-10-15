@@ -173,6 +173,7 @@ def effect_rates(s):
 def downstream(s, refs):
     found = set(refs)
     while True:
+        found.update('asset:'+a['asset_id'] for a in version(s)['assets'] if found.intersection(a.get('sources',[])))
         new = {l['key'] for l in version(s)['lines'] if found.intersection(l['inputs'] + l['sources'] + s.get('calculations',{}).get(l['key'],{}).get('refs',[]))}
         if new.issubset(found): return sorted(found)
         found.update(new)
@@ -284,6 +285,15 @@ def invalidate(s):
         s['signatures']={};s['approvals']={}
     for step in ['Reviewer sign-off','Partner sign-off','Client approval and e-file authorization']:s['steps'].pop(step,None)
 
+def invalidate_review_confirmation(s,role):
+    # Confirmation records do not replace preparer work or reopen its handoff.
+    levels=['reviewer','partner'] if role=='reviewer' else ['partner']
+    for level in levels:
+        s['signatures'].pop(level,None)
+        s['steps'].pop(level.title()+' sign-off',None)
+    s['approvals']={}
+    s['steps'].pop('Client approval and e-file authorization',None)
+
 def require(ok,msg):
     if not ok:raise ValueError(msg)
 
@@ -385,7 +395,7 @@ def workflow_action(s,u,a,p):
         require(not any(c['id'] not in s['resolutions'] and (c['key'] in keys or keys.intersection(c['affected'])) for c in checks(s)),'Disposition the findings affecting this form first.')
         require(not any(not n.get('resolved') and n['target'] in keys|{f,'engagement'} for n in s['notes']),'Resolve blocking review notes first.')
         prepared={s['verifications'][k]['actor'] for k in keys}
-        prepared.update(e['actor'] for e in s['events'] if e['action'] in ['adjust','verify','calculation','add_line'] and (e['payload'].get('key') in keys or keys.intersection(e['payload'].get('keys',[]))))
+        prepared.update(e['actor'] for e in s['events'] if (e['action'] in ['adjust','calculation','add_line'] or e['action']=='verify' and e.get('role')=='preparer') and (e['payload'].get('key') in keys or keys.intersection(e['payload'].get('keys',[]))))
         require(u['id'] not in prepared,'You cannot review a form you prepared or verified.')
     s.setdefault('form_work',{}).setdefault(f,{}).update(stage=step,reason=reason,actor=u['id'],at=now())
     p['before']=current
@@ -431,22 +441,37 @@ def mutate(s,u,a,p):
         editor();keys=p.get('keys',[]);require(0<len(keys)<=100,'Select 1–100 lines.')
         method=text('method');require(method in s['standards']['verification_types'],'Choose a firm verification method.')
         rr=refs();note=text('note')
-        p['_before']={k:copy.deepcopy(s['verifications'].get(k)) for k in keys}
+        confirmation=role in ['reviewer','partner']
+        p['verification_kind']='review_confirmation' if confirmation else 'preparer_tie_out'
+        store=s.setdefault('review_confirmations',{}).setdefault(u['id'],{}) if confirmation else s['verifications']
+        p['_before']={k:copy.deepcopy(store.get(k)) for k in keys}
         for k in keys:
             require(k in lines(s),'Unknown line.')
+            if confirmation:
+                prepared=s['verifications'].get(k,{})
+                require(prepared and prepared.get('value')==effective(s,k) and prepared.get('version')==s['version'],'A current preparer tie-out is required before reviewer confirmation: '+k)
+                require(prepared['actor']!=u['id'] and not any(x.get('actor')==u['id'] for x in [s['adjustments'].get(k,{}),s.get('calculations',{}).get(k,{})]),'You cannot independently confirm your own work.')
             calculation=s.get('calculations',{}).get(k)
             if method=='recalculated' and calculation:
                 current=features.calculate(s,calculation['expression'],calculation['refs']);require(abs(current['result']-effective(s,k))<=0.51,'Recorded calculation differs from '+k+'. Resolve the amount before marking it recalculated.')  # Preserve the calculation author's original record.
-            s['verifications'][k]=dict(actor=u['id'],at=now(),method=method,refs=rr,note=note,value=effective(s,k),version=s['version'],batch_event=len(s['events'])+1)
+            store[k]=dict(actor=u['id'],at=now(),method=method,refs=rr,note=note,value=effective(s,k),version=s['version'],batch_event=len(s['events'])+1,kind=p['verification_kind'],preparation_hash=digest(s['verifications'].get(k)))
+        if confirmation:
+            invalidate_review_confirmation(s,role)
+            material=False
     elif a=='undo_verify':
         editor();last=next((e for e in reversed(s['events']) if e['actor']==u['id'] and e['action']=='verify' and not any(z['action']=='undo_verify' and z['payload'].get('event_id')==e['id'] for z in s['events'])),None)
         require(last is not None,'No verification batch to undo.')
+        confirmation=last['payload'].get('verification_kind')=='review_confirmation'
+        store=s.setdefault('review_confirmations',{}).setdefault(u['id'],{}) if confirmation else s['verifications']
         for k in last['payload']['keys']:
-            if s['verifications'].get(k,{}).get('batch_event')==last['id']:
+            if store.get(k,{}).get('batch_event')==last['id']:
                 before=last['payload'].get('_before',{}).get(k)
-                if before:s['verifications'][k]=before
-                else:s['verifications'].pop(k,None)
+                if before:store[k]=before
+                else:store.pop(k,None)
         p['event_id']=last['id']
+        if confirmation:
+            invalidate_review_confirmation(s,role)
+            material=False
     elif a=='adjust':
         require(role=='preparer','Only preparers can propose adjustments.')
         k=text('key');require(k in lines(s),'The line must exist in the selected engine version.')
