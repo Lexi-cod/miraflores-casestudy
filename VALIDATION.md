@@ -4,6 +4,8 @@ Implemented clickable form amounts, missing working detail, recorded calculation
 
 Validation for this revision is limited to source/schema inspection, Python AST parsing and JavaScript syntax checks. **No automated tests or browser checks were run**, as requested. Existing older test results do not validate this revision. New workflows, PostgreSQL operation, encryption, retention, exports and visual behavior still need the user's manual review. Deployment status checks, if performed, confirm provisioning only.
 
+Render reported the initial deployment succeeded on October 15, 2026. Both services show Free; the database is Available and expires November 14, 2026. These are deployment observations, not portal workflow tests.
+
 Saved case work is preserved; no review, adjustment, authorization or filing completion is seeded. Earlier code is backed up under `.backups/requirements-completion-20261015-143358`.
 
 Suggested manual walkthrough: preparer opens a form and traces a source; records a formula/adjustment; reviewer approves it; partner approves a material effect; clients download/authorize the reviewed package; partner records simulated filing and freeze; prepare/review a notice response and export the binder; create 2026 intake. Readiness prerequisites remain required rather than being bypassed for this walkthrough.

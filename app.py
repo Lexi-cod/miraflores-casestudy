@@ -276,7 +276,7 @@ def blockers(s):
 
 def event(s,u,action,payload):
     prev=s['events'][-1]['hash'] if s['events'] else '0'*64
-    e=dict(id=len(s['events'])+1,at=now(),actor=u['id'],name=u['name'],action=action,payload=copy.deepcopy(payload),previous_hash=prev)
+    e=dict(id=len(s['events'])+1,at=now(),actor=u['id'],name=u['name'],role=u.get('role','system'),action=action,payload=copy.deepcopy(payload),previous_hash=prev)
     e['hash']=digest(e);s['events'].append(e)
 
 def invalidate(s):
