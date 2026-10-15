@@ -1,0 +1,31 @@
+# Free submission demo. Render's free Postgres database expires after 30 days.
+services:
+  - type: web
+    name: miraflores-casestudy
+    runtime: python
+    plan: free
+    region: oregon
+    numInstances: 1
+    buildCommand: pip install -r requirements.txt
+    startCommand: python app.py
+    healthCheckPath: /health
+    envVars:
+      - key: HOST
+        value: 0.0.0.0
+      - key: DATABASE_URL
+        fromDatabase:
+          name: miraflores-casestudy-db
+          property: connectionString
+      - key: WORKPAPER_ENCRYPTION_SECRET
+        generateValue: true
+      - key: PYTHON_VERSION
+        value: 3.13.7
+      - key: PYTHONUNBUFFERED
+        value: "1"
+databases:
+  - name: miraflores-casestudy-db
+    plan: free
+    region: oregon
+    databaseName: miraflores
+    user: miraflores
+    ipAllowList: []
