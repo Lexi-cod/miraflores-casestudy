@@ -606,8 +606,13 @@ def mutate(s,u,a,p):
             reopen_form_work(s,'Review record changed; review before resubmitting.',completed)
     s['revision']+=1;event(s,u,a,p);return s
 
-def redact(obj):
-    # Redact embedded occurrences too, including document prose and free-text events.
+_REDACTION_CACHE = None
+
+def redaction_secrets():
+    # The delivered packet is immutable; reuse its identifier inventory across records.
+    global _REDACTION_CACHE
+    if _REDACTION_CACHE is not None and _REDACTION_CACHE[0] is PACKET:
+        return _REDACTION_CACHE[1]
     secret=set()
     def collect(x):
         if isinstance(x,dict):
@@ -621,10 +626,17 @@ def redact(obj):
     for ev in PACKET['extracted_values']:
         if ev['value_type'] in ['ssn','account_number'] or any(w in ev['field'] for w in ['pin','license']):
             secret.add(str(ev['value']));secret.add(ev['text_as_read'])
+    ordered=tuple(sorted(secret,key=len,reverse=True))
+    _REDACTION_CACHE=(PACKET,ordered)
+    return ordered
+
+def redact(obj):
+    # Redact embedded occurrences too, including document prose and free-text events.
+    secret=redaction_secrets()
     def scrub(x):
         if isinstance(x,str):
             x=re.sub(r'\b\d{3}-\d{2}-\d{4}\b','•••-••-••••',x)
-            for v in sorted(secret,key=len,reverse=True):
+            for v in secret:
                 if len(v)>=4:x=x.replace(v,'[REDACTED]')
             return x
         if isinstance(x,dict):return {k:('[REDACTED]' if k=='account' or any(w in k.lower() for w in ['ssn','account_number','routing','ip_pin','ero_pin','efin','ptin','dob','license_number']) else scrub(v)) for k,v in x.items()}
@@ -687,9 +699,9 @@ class Handler(BaseHTTPRequestHandler):
                     if 'export' not in capabilities(u)['actions']:return self.send(403,{'error':'This role cannot export tax records.'})
                     return self.send(200,dict(format='miraflores-workpaper-1',exported_at=now(),packet_sha256=digest(PACKET),record=response(s,u),export_scope='Masked, self-contained review record; attachment content withheld',retention='7 years after actual filing; production destruction requires an external retention service'))
             return self.send(404,{'error':'Not found'})
-        files={'/':'index.html','/app.js':'app.js','/review.js':'review.js','/workspace.js':'workspace.js','/ownership.js':'ownership.js','/features.js':'features.js','/schedules.js':'schedules.js','/styles.css':'styles.css'}
+        files={'/':'index.html','/app.js':'app.js','/review.js':'review.js','/workspace.js':'workspace.js','/ownership.js':'ownership.js','/features.js':'features.js','/schedules.js':'schedules.js','/styles.css':'styles.css','/brand.css': 'brand.css', '/presentation.js':'presentation.js','/fraunces.woff2':'fraunces.woff2','/poppins.woff2':'poppins.woff2'}
         if path not in files:return self.send(404,{'error':'Not found'})
-        f=ROOT/'web'/files[path];ct={'html':'text/html','js':'text/javascript','css':'text/css'}[f.suffix[1:]];self.send(200,f.read_bytes(),ct)
+        f=ROOT/'web'/files[path];ct={'html':'text/html','js':'text/javascript','css':'text/css','woff2':'font/woff2'}[f.suffix[1:]];self.send(200,f.read_bytes(),ct)
     def do_POST(self):
         try:
             host=self.headers.get('Host','');origin=self.headers.get('Origin')

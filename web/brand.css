@@ -1,0 +1,24 @@
+/* Miraflores public brand, with all fonts served by this application. */
+@font-face{font-family:Fraunces;src:url('/fraunces.woff2') format('woff2');font-weight:300 600;font-display:swap}
+@font-face{font-family:Poppins;src:url('/poppins.woff2') format('woff2');font-weight:700;font-display:swap}
+:root{color:#13241b;background:#f6f7fb;--green:#4951f3;--dark:#13241b;--muted:#627065;--border:#e0e2dd;--serif:Fraunces,Georgia,serif;--accent:#4951f3;--cream:#faf6ec}
+body{background:linear-gradient(140deg,#f5f2fc 0,#f6f7fb 38%,#faf8f1 100%)}
+.sidebar{background:var(--cream);color:#405446;border-right:1px solid var(--border)}
+.brand{color:var(--dark);letter-spacing:-1.2px}.brand-wordmark{font:700 27px Poppins,'Segoe UI',sans-serif;letter-spacing:-1.4px;white-space:nowrap}.brand-wordmark span{color:var(--accent)}.brand-wordmark b{color:var(--dark)}
+.brand-sub{color:#536454;margin:8px 0 32px 2px;font-size:8px;letter-spacing:2.2px}
+.workspace{background:#fffdf7;border-color:#dedfd5;border-radius:12px}.workspace strong,.user select{color:var(--dark)}.user small,.privacy,.nav-label{color:#627065}.privacy{border-color:#dcdfd5}.sidebar .avatar{background:#e6e4fc;color:#363dc2}
+.nav button{border-radius:9px}.nav button.active{background:#e8e7ff;color:#3038bd;font-weight:600}.nav button:hover{background:#efecff}.nav .count{background:#dcdafa;color:#353eae}.nav button.active .count{background:#d6d3fc}
+.topbar{background:#fffdf8}.search{background:#fff;border-radius:20px}.page-heading h1{color:var(--dark);font-weight:400}.eyebrow,.subtitle,.stat-label,.stat-foot{color:#627065}
+.btn{border-radius:20px;border-color:#d8dcd5}.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}.btn.light{background:#f0efff;color:#363ec5}.btn.small{border-radius:16px}.btn:focus-visible,button:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.panel,.stat,.form-card{border-radius:14px}.panel-head{background:#fffdf8}.panel-footer,.compact-table th{background:#faf8f2}.compact-table th{color:#566358}.compact-table tr:hover td{background:#f7f6ff}
+.stat-number,.context-amount,.form-card>strong{color:var(--dark)}.stat{box-shadow:0 3px 12px #13241b04}.stat .tiny-bar i{background:var(--accent)}
+.tabs button.active{color:#363dc4;border-bottom-color:var(--accent)}.tab-count{background:#ebe9fa;color:#4846a0}.review-stages .current{color:#363dc4}
+.work-tabs .btn.active,.schedule-shortcuts button.active{background:var(--accent);border-color:var(--accent);color:#fff}.work-tabs .btn span{background:#eae8fb;color:#4543ac}.schedule-shortcuts button{background:#f6f4ff;border-color:#e0dcf0;color:#424a76}.drawer-header{background:var(--cream)}.assignment-count{background:var(--accent)}
+.link-btn,.amount-link,.trace-breadcrumbs button{color:#3941c7}.amount-link{text-decoration-color:#b3b5ee}.amount-link:hover,.amount-link:focus-visible{background:#eeecff;text-decoration-color:var(--accent)}
+.form-card:hover,.form-card:focus-visible{border-color:#888cf2;box-shadow:0 4px 18px #4951f30d}.form-card progress{accent-color:var(--accent)}.form-card progress::-webkit-progress-value{background:var(--accent)}
+.number-context,.calculation-equation{background:#f3f1fc;border-color:#dfdcf2}.evidence-card:hover,.evidence-card:focus-visible{background:#f4f2ff;border-color:#abaaf0}.trace-details{border-color:#dfdfeb}.trace-details>summary{color:#434b73}
+.drawer-head,.modal-head{background:var(--cream)}.drawer-content h3{color:#344637}.document-page-counter input{background:#f6f4ff;border-color:#c4c1ec}.document-page-counter input:focus{outline-color:var(--accent)}
+.ring{background:conic-gradient(var(--accent) var(--progress),#e9e7f4 0)}.legend i{background:var(--accent)}
+.tag.blue{background:#eeecff;color:#4543ac}.tag.green{background:#e6f1e7;color:#2e633e}.tag.amber{background:#fff0d8;color:#885618}.tag.red{background:#fbe9e5;color:#a13e30}
+.readable-list{padding-left:20px;margin:0;display:grid;gap:8px}.readable-record{font-family:'Segoe UI',Arial,sans-serif;font-size:12px;line-height:1.65}.readable-record>div{min-width:0}.readable-record dd{overflow-wrap:anywhere}.readable-record .readable-record{margin:0;padding:12px;background:#f7f6fb;border-radius:8px}.record-reference{white-space:normal;text-align:left}.readable-list li::marker{color:#8683bd}
+@media(max-width:760px){.brand-wordmark{font-size:23px}.content{padding:22px 16px}.topbar{padding-inline:16px}}

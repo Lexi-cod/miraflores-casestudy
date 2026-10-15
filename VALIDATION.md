@@ -1,3 +1,5 @@
+Latest manual walkthrough: see [MANUAL_VALIDATION.md](MANUAL_VALIDATION.md) for the October 15 branding, readable-record and role-workflow checks, including explicit checkpoint setup and untested cases.
+
 # Targeted review corrections ? October 15, 2026
 
 Separated reviewer/partner confirmations from preparer tie-outs, preserving independent sign-off and batch undo. Confirmations become stale when the underlying preparer tie-out changes; recording one reopens review signatures/client authorization without resetting preparer handoff. Existing tie-outs/history are preserved.
@@ -84,7 +86,7 @@ Role assignment, default permissions, per-person allow/block overrides and acces
 - No actual engagement reviews, corrections, sign-offs or client approvals were fabricated for demonstration. The live database remains at initial revision 0. Scripted filing events are not treated as actual filing status.
 
 The test suite verifies application controls, not tax-law correctness or production security certification. See `COMPLIANCE.md` for the complete deployment boundary.
-# Supporting schedule presentation — October 15, 2026
+# Supporting schedule presentation  -  October 15, 2026
 
 Replaced JSON drawers for depreciation and historical/agency records with readable fields and tables. Added company and sale-date filters, sorting and filtered gain/loss totals without double-counting Form 8949 subtotals. Rentals are grouped by property with a separate combined passive-activity section. Basis history is grouped by entity/year; payments distinguish 2025 credits from 2024 postings; carryovers separate incoming balances from engine carryforwards. Books-to-tax amounts now open extracted evidence directly. Supporting references are expandable.
 

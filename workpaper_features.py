@@ -12,6 +12,7 @@ import math
 import operator
 import secrets
 import zipfile
+from functools import lru_cache
 import workpaper_calculations
 from datetime import datetime, timezone
 
@@ -243,7 +244,7 @@ def mutate(s,u,a,p):
             previous=next(e for e in reversed(events) if e['kind'] in ['submitted','resubmitted'])
             A.require(previous['package_hash']==package_hash(s),'The return changed after submission; record a new submission.')
         dated=text('date');datetime.strptime(dated,'%Y-%m-%d')
-        s['filing_events'].append(dict(**stamp,id='filing-'+secrets.token_hex(5),jurisdiction=jurisdiction,kind=kind,date=dated,reason=text('reason'),refs=refs(),cycle=s['amendment'],package_hash=package_hash(s),mode='Simulated case record — no transmission'))
+        s['filing_events'].append(dict(**stamp,id='filing-'+secrets.token_hex(5),jurisdiction=jurisdiction,kind=kind,date=dated,reason=text('reason'),refs=refs(),cycle=s['amendment'],package_hash=package_hash(s),mode='Simulated case record  -  no transmission'))
         return False
     if a=='notice_response':
         ident=text('id');A.require(any(n['id']==ident for n in A.PACKET['tax_agency_records']['notices']),'Unknown notice.')
@@ -297,8 +298,9 @@ def artifact(s,u,scope='review',notice=None):
         state={k:state.get(k) for k in ['version','adjustments','approvals','frozen','amendment']}
         state['approvals']={k:v for k,v in state['approvals'].items() if k==u['id']}
         state['adjustments']={k:{field:a.get(field) for field in ['key','original','value','delta','federal_estimate','california_estimate']} for k,a in state['adjustments'].items()}
-    esc=lambda x:html.escape(str(x if x is not None else ''))
+    esc=lambda x:html.escape(str(x if x is not None else '').replace('\u2014', ' - '))
     def ident(ref):return 'r-'+base64.urlsafe_b64encode(ref.encode()).decode().rstrip('=')
+    @lru_cache(maxsize=None)
     def link(ref):
         try:
             item=A.resolve(ref,s)

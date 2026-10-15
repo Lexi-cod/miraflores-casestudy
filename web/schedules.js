@@ -9,13 +9,8 @@ function scheduleSources(sources,title='Supporting evidence'){
   const list=[...new Set((Array.isArray(sources)?sources:[sources]).filter(Boolean))];
   return list.length?`<details class="trace-details"><summary>${esc(title)} · ${list.length}</summary>${list.map(r=>sourceObject(r)!==undefined||r.startsWith('doc:')?evidenceCard(r):`<p>${esc(r)}</p>`).join('')}</details>`:'';
 }
-function scheduleRecord(record,path='',key=''){
-  if(record===null||record===undefined)return '<span class="muted">Not supplied</span>';
-  if(typeof record==='number')return /^(year|life_years)$/.test(key)?esc(record):path?scheduleAmount(record,path):fmt(record);
-  if(typeof record!=='object')return esc(String(record));
-  if(Array.isArray(record))return `<div class="schedule-record-list">${record.map((r,i)=>`<div>${scheduleRecord(r,path?path+'/'+i:'',key)}</div>`).join('')}</div>`;
-  return `<dl class="reference-record">${Object.entries(record).map(([k,v])=>`<div><dt>${esc(friendlyLabel(k))}</dt><dd>${['sources','source_document'].includes(k)?scheduleSources(v):scheduleRecord(v,path?path+'/'+k:'',k)}</dd></div>`).join('')}</dl>`;
-}
+function scheduleRecord(record,path='',key=''){return recordPresentation(record,key,path)}
+
 function scheduleLineRows(lines){
   return `<div class="table-wrap"><table class="compact-table"><thead><tr><th>Return line</th><th class="num">Engine</th><th class="num">Working amount</th><th>Review</th></tr></thead><tbody>${lines.map(l=>`<tr><td>${esc(l.label)}<small>${esc(l.key)}</small></td><td class="num">${inspectAmount(l.value,l.key)}</td><td class="num">${inspectAmount(val(l.key),l.key)}</td><td>${reasonBadges(l)}</td></tr>`).join('')||'<tr><td colspan="4" class="empty">No return lines match this focus.</td></tr>'}</tbody></table></div>`;
 }
