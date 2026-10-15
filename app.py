@@ -267,6 +267,7 @@ def blockers(s):
         if step not in s['steps']:b.append(step)
     for role in ['preparer','reviewer','partner']:
         if role not in s['signatures']:b.append(role.title()+' signature required')
+        elif s['signatures'][role].get('content_hash')!=features.review_hash(s):b.append(role.title()+' signature needs renewal for changed review content')
     if not all(s['approvals'].get(u['id'],{}).get('package_hash')==features.package_hash(s) for u in PACKET['firm']['client_users']):b.append('Both clients must approve this revision and authorize e-filing')
     b.extend(features.extra_blockers(s))
     if not any(j.get('subject')=='ca-amt' and j.get('reviewed_by') and j['reviewed_by']!=j['actor'] for j in s['judgments']):b.append('California AMT requires an independently reviewed calculation (judgment subject: ca-amt)')
@@ -435,7 +436,7 @@ def mutate(s,u,a,p):
             require(k in lines(s),'Unknown line.')
             calculation=s.get('calculations',{}).get(k)
             if method=='recalculated' and calculation:
-                current=features.calculate(s,calculation['expression'],calculation['refs']);require(abs(current['result']-effective(s,k))<=0.51,'Recorded calculation differs from '+k+'. Resolve the amount before marking it recalculated.');pass  # Verification records the current result without altering the calculation author's record.
+                current=features.calculate(s,calculation['expression'],calculation['refs']);require(abs(current['result']-effective(s,k))<=0.51,'Recorded calculation differs from '+k+'. Resolve the amount before marking it recalculated.')  # Preserve the calculation author's original record.
             s['verifications'][k]=dict(actor=u['id'],at=now(),method=method,refs=rr,note=note,value=effective(s,k),version=s['version'],batch_event=len(s['events'])+1)
     elif a=='undo_verify':
         editor();last=next((e for e in reversed(s['events']) if e['actor']==u['id'] and e['action']=='verify' and not any(z['action']=='undo_verify' and z['payload'].get('event_id')==e['id'] for z in s['events'])),None)
@@ -508,7 +509,7 @@ def mutate(s,u,a,p):
         require(not any(not n['resolved'] for n in s['notes']),'Resolve all open review notes first.')
         require(not any(c['id'] not in s['resolutions'] for c in checks(s)),'Resolve reconciliation findings first.')
         require(not features.extra_blockers(s),'Complete adjustment approvals and outside-filing conclusions first.')
-        s['signatures'][level]=dict(actor=u['id'],at=now(),revision=s['revision'],statement=text('statement'))
+        s['signatures'][level]=dict(actor=u['id'],at=now(),revision=s['revision'],content_hash=features.review_hash(s),statement=text('statement'))
         if level in ['reviewer','partner']:s['steps'][level.title()+' sign-off']=s['signatures'][level]
         material=False
     elif a=='approve':

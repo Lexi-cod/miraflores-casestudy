@@ -6,7 +6,7 @@ The app calls no external AI, analytics, fonts or CDNs. Local mode stores work o
 
 ## Submission link
 
-Deployment target: **Render Free web service + Free Postgres**, using `https://github.com/Lexi-cod/miraflores-casestudy`. The free database expires after 30 days. See [DEPLOYMENT.md](DEPLOYMENT.md) for setup and export instructions. No paid resources are configured.
+App: **https://miraflores-casestudy.onrender.com/** (initial deployment in progress). Hosting: **Render Free web service + Free Postgres**, using `https://github.com/Lexi-cod/miraflores-casestudy`. The free database expires after 30 days. See [DEPLOYMENT.md](DEPLOYMENT.md) for setup and export instructions. No paid resources are configured.
 
 ## Portal workflow
 

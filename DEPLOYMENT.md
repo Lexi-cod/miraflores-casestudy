@@ -1,5 +1,7 @@
 # Free Render submission deployment
 
+Application URL: https://miraflores-casestudy.onrender.com/ (initial deployment in progress).
+
 Target repository: `https://github.com/Lexi-cod/miraflores-casestudy`.
 
 `render.yaml` configures a **Free web service** and **Free Postgres database**. It contains no paid disk or paid compute plan.

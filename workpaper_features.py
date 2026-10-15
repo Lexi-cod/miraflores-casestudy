@@ -39,7 +39,7 @@ def ensure(s):
     return s
 
 OUTSIDE = [
-    ('foreign-account','Foreign account reporting / FBAR',['D33','F8938.req'], 'Assess separately from Form 8938.'),
+    ('foreign-account','Foreign account reporting / FBAR',['D36','F8938.req'], 'Assess separately from Form 8938.'),
     ('dependent-return','Dependent’s own return',['related:0'], 'Confirm dependency treatment agrees with the household.'),
     ('scorp-state','S corporation and Oregon composite return',['related:1','D39','D40'], 'External preparer; reconcile K-1 and state support.'),
     ('partnership-state','Partnership and Arizona composite return',['related:2','D37','D38'], 'External administrator; reconcile K-1 and state supplement.'),
@@ -90,6 +90,11 @@ def package(s):
         judgments=s['judgments'],outside_filings=s.get('outside_filings',{}),amendment=s['amendment'])
 
 def package_hash(s):return A.digest(package(s))
+
+def review_hash(s):
+    records={k:s.get(k) for k in ['verifications','calculations','resolutions','notes','judgments','evidence','answer_evidence','links','documents','areas','standards','related_reviews']}
+    records['steps']={k:v for k,v in s['steps'].items() if k not in ['Reviewer sign-off','Partner sign-off','Client approval and e-file authorization']}
+    return A.digest(dict(package=package(s),review=records))
 
 def resolve(ref,s):
     if ref.startswith('answer:'):return next(x for x in s.get('answer_evidence',[]) if x['id']==ref)

@@ -28,6 +28,7 @@ function evidenceGraph(){
   for(const l of rv().lines)add(l.form,l.key);
   for(const l of rv().lines)for(const r of [...l.sources,...l.inputs,...(D.state.adjustments[l.key]?.refs||[]),...(D.state.calculations?.[l.key]?.refs||[])])add(r,l.key);
   for(const link of D.state.links)add(link.source,link.target);
+  for(const c of D.checks)add(c.id,c.key);
   for(const e of [...D.state.evidence,...(D.state.answer_evidence||[])])if(e.target&&e.target!=='engagement')add(e.id,e.target);
   graphCache={data:D,edges};return edges;
 }
