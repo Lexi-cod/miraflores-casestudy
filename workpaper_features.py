@@ -281,7 +281,7 @@ def mutate(s,u,a,p):
 
 def make_authorization(s,u,p):
     name=str(p.get('signed_name','')).strip();A.require(name.casefold()==u['name'].casefold(),'Type your full name as displayed in the client portal.')
-    A.require(p.get('consent') is True,'Confirm you reviewed the package and authorize this case filing.')
+    A.require(p.get('consent') is True,'Confirm you reviewed and approve this return package.')
     return dict(at=A.now(),revision=s['revision'],signed_name=name,actor=u['id'],statement=str(p.get('statement','')).strip(),package_hash=package_hash(s),
         version=s['version'],engine_summary=copy.deepcopy(A.version(s)['summary']),estimate=estimate(s),authorization='Electronic case-study authorization; not an executed IRS Form 8879 or live transmission')
 

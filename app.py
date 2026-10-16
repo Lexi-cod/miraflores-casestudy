@@ -55,7 +55,7 @@ TAX_STAFF = ['preparer','reviewer','partner','quality_reviewer']
 ACCESS_FEATURES = [
     dict(id='case_calculations',label='Document calculations and completeness',detail='Save derivations, outside-filing conclusions and related-return work.',actions=['calculation','outside_filing','related_review'],roles=['preparer','reviewer','partner']),
     dict(id='adjustment_approval',label='Review estimated adjustments',detail='Independently approve changes and their inclusion in the estimated effect.',actions=['review_adjustment'],roles=['reviewer','partner']),
-    dict(id='case_lifecycle',label='Record case filing and carryforward',detail='Record simulated filing events and roll a frozen engagement forward.',actions=['filing_event','roll_forward'],roles=['partner']),
+    dict(id='case_lifecycle',label='Record filing activity and carryforward',detail='Document filing activity with evidence and roll a frozen engagement forward.',actions=['filing_event','roll_forward'],roles=['partner']),
     dict(id='retention',label='Manage retention holds',detail='Place or release a legal hold with a recorded reason.',actions=['retention_policy'],roles=['firm_administrator']),
     dict(id='engagement_team',label='Manage engagement team',detail='Designate the lead preparer, reviewer, partner and due date.',actions=['manage_team'],roles=['firm_administrator','partner']),
     dict(id='form_allocation',label='Allocate forms',detail='The engagement reviewer or partner can delegate form ownership.',actions=['assign_form'],roles=['reviewer','partner']),
@@ -691,7 +691,7 @@ class Handler(BaseHTTPRequestHandler):
                 return self.send(200,dict(staff=[effective_user(s,u) for u in STAFF.values()],mode='local-demo'))
         if path.startswith('/api/'):
             u=self.user()
-            if not u:return self.send(401,{'error':'Select a role to start the local demonstration.'})
+            if not u:return self.send(401,{'error':'Select a workspace user to continue.'})
             with LOCK:
                 s=read_state();u=effective_user(s,u)
                 if path=='/api/state':return self.send(200,response(s,u))

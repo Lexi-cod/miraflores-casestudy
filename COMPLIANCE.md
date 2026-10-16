@@ -1,6 +1,6 @@
 # Requirement coverage and operating boundaries
 
-Source: the three-page case-study brief and the supplied packet README. This matrix describes implemented mechanisms, not a certification or a claim that every new workflow has been exercised. Manual validation remains outstanding at the user's request.
+Source: the three-page case-study brief and the supplied packet README. This matrix describes implemented mechanisms, not a certification or a claim that every new workflow has been exercised. The completed manual walkthrough and its remaining limits are documented in MANUAL_VALIDATION.md. UI copy changes do not establish production readiness.
 
 | Requirement | Implemented case capability | Exact boundary |
 | --- | --- | --- |
