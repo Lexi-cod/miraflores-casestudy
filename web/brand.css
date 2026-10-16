@@ -8,7 +8,9 @@
 --green:var(--mf-indigo);--dark:var(--mf-ink);--muted:#475569;--border:var(--mf-line);--accent:var(--mf-indigo);--line:var(--mf-line);--surface:var(--mf-card);--wash:var(--mf-canvas);
 --serif:Fraunces,Georgia,serif;font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:var(--mf-ink);background:var(--mf-canvas)
 }
-body{background:var(--mf-canvas)}
+html{-webkit-text-size-adjust:100%;tab-size:4;line-height:1.5;font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}
+body{background:var(--mf-canvas);font-family:Fraunces,Georgia,serif}
+.loading span,.stat-number span{font-family:inherit}
 .app{grid-template-columns:280px minmax(0,1fr)}
 .sidebar{width:280px;padding:28px 18px 22px;background:linear-gradient(160deg,var(--mf-indigo-600),var(--mf-indigo-700) 58%,var(--mf-indigo-900));color:#eef0ff;border-right:0;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--mf-periwinkle) transparent}
 .brand{color:#fff;padding:0 7px;letter-spacing:-1.2px}.brand-wordmark{font:700 32px Poppins,system-ui,sans-serif;letter-spacing:-1.6px;white-space:nowrap}.brand-wordmark span{color:var(--mf-periwinkle)}.brand-wordmark b{color:inherit}
