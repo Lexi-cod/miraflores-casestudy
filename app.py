@@ -699,7 +699,7 @@ class Handler(BaseHTTPRequestHandler):
                     if 'export' not in capabilities(u)['actions']:return self.send(403,{'error':'This role cannot export tax records.'})
                     return self.send(200,dict(format='miraflores-workpaper-1',exported_at=now(),packet_sha256=digest(PACKET),record=response(s,u),export_scope='Masked, self-contained review record; attachment content withheld',retention='7 years after actual filing; production destruction requires an external retention service'))
             return self.send(404,{'error':'Not found'})
-        files={'/':'index.html','/app.js':'app.js','/review.js':'review.js','/workspace.js':'workspace.js','/ownership.js':'ownership.js','/features.js':'features.js','/schedules.js':'schedules.js','/styles.css':'styles.css','/brand.css': 'brand.css', '/presentation.js':'presentation.js','/fraunces.woff2':'fraunces.woff2','/poppins.woff2':'poppins.woff2'}
+        files={'/':'index.html','/app.js':'app.js','/review.js':'review.js','/workspace.js':'workspace.js','/ownership.js':'ownership.js','/features.js':'features.js','/schedules.js':'schedules.js','/styles.css':'styles.css','/brand.css': 'brand.css', '/presentation.js':'presentation.js','/guide.js':'guide.js','/guide.css':'guide.css','/fraunces.woff2':'fraunces.woff2','/poppins.woff2':'poppins.woff2'}
         if path not in files:return self.send(404,{'error':'Not found'})
         f=ROOT/'web'/files[path];ct={'html':'text/html','js':'text/javascript','css':'text/css','woff2':'font/woff2'}[f.suffix[1:]];self.send(200,f.read_bytes(),ct)
     def do_POST(self):

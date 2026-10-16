@@ -10,6 +10,8 @@ App: **https://miraflores-casestudy.onrender.com/**. Hosting: **Render Free web 
 
 ## Portal workflow
 
+First-time visitors receive an optional interactive guide. Settings & help replays the full tour or a short guide for any page available to the current role. Guides explain key tax-review terms, highlight controls, and navigate without saving workpaper actions. Closing or completing the guide remembers the preference for that workspace user in the current browser; clearing browser storage or using another browser starts a new first visit. Reduced-motion preferences are respected.
+
 1. **Overview:** source-error count, estimated tax and payment effects, engagement owners, progress and recent work.
 2. **Workpapers:** By form, Open issues and To tie out share one workspace. Open a form to inspect clickable amounts; large schedules use paginated detail. Primary evidence opens at its source page with a matching-text highlight. Supporting records and complete source-to-return trails expand when needed. Document a formula using linked numeric inputs, propose an adjustment or add missing detail. Engine values remain preserved.
 3. **Evidence library:** account for every PBC document; inspect pages, extraction readings, direct destinations and downstream return use. Attach files, messages and notes. Client answers receive stable evidence references.

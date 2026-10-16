@@ -55,6 +55,10 @@ This is application workflow validation, not a manual audit of every one of the 
 
 ## Limits of this pass
 
+### Interactive guide follow-up
+
+Manually checked the first-visit welcome, starting the staff guide, jumping to Workpapers, closing and reloading without another prompt, replaying from Settings & help, all four Workpapers tips, finishing and returning to the original workspace, separate client onboarding with only the client chapter, and Escape dismissal. These checks used an isolated local database; its revision remained zero. Source review and syntax checks cover the page catalog and role filtering. Other chapters and narrow viewport placement were not individually exercised in this follow-up. Preferences are stored per workspace user in browser local storage, with an in-memory fallback when storage is unavailable.
+
 - The responsive viewport capability did not actually resize the browser: DOM measurement stayed at 1536 pixels. Narrow/mobile behavior is therefore not marked passed.
 - Binary-file upload/download, recomputed-version import, every judgment/calculation formula, legal-hold expiry/destruction, and every access-override combination were not individually exercised in this manual pass.
 - The prepared checkpoint validates finalization controls after prerequisites exist. Its seeded conclusions do not count as manual preparation or independent review of the entire case.
